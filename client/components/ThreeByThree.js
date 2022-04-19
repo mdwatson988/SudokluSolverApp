@@ -1,4 +1,4 @@
-import Square from './Square';
+import Box from './Box';
 
 
 
