@@ -15,8 +15,9 @@ mongoose.connect(MONGO_URI, dbOptions, (err) => {
 });
 
 const statisticSchema = new mongoose.Schema({
-  currDate: Date,
-  currMonth: Date,
+  storedDate: Number,
+  storedMonth: Number,
+  storedYear: Number,
   solvedToday: Number,
   solvedThisMonth: Number,
   solvedTotal: Number,
