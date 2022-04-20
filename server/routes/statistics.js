@@ -8,6 +8,7 @@ router.get('/',
   statisticsController.getDocument,
   statisticsController.setDate,
   (req, res) => {
+    res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
     res.status(200).json(res.locals.statistics);
   });
 
@@ -16,6 +17,7 @@ router.get('/update',
   statisticsController.setDate,
   statisticsController.updateStatistics,
   (req, res) => {
+    res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
     res.status(200).json(res.locals.statistics);
   });
 
@@ -28,6 +30,7 @@ router.get('/clear',
   statisticsController.getDocument,
   statisticsController.clearStatistics,
   (req, res) => {
+    res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
     res.status(200).json(res.locals.statistics);
   });
 

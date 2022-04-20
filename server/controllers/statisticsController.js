@@ -42,21 +42,21 @@ statisticsController.setDate = (req, res, next) => {
 
   if (currDate.getYear() && currDate.getYear() === storedYear) {
     if (currDate.getMonth() === storedMonth) {
-      if (currDate.getDay() !== storedDate) {
+      if (currDate.getDate() !== storedDate) {
         updateObj.solvedToday = 0;
-        updateObj.storedDate = currDate.getDay();
+        updateObj.storedDate = currDate.getDate();
       }
     }
     else {
       updateObj.solvedToday = 0;
-      updateObj.storedDate = currDate.getDay();
+      updateObj.storedDate = currDate.getDate();
       updateObj.solvedThisMonth = 0;
       updateObj.storedMonth = currDate.getMonth();
     }
   }
   else {
     updateObj.solvedToday = 0;
-    updateObj.storedDate = currDate.getDay();
+    updateObj.storedDate = currDate.getDate();
     updateObj.solvedThisMonth = 0;
     updateObj.storedMonth = currDate.getMonth();
     updateObj.storedYear = currDate.getYear();
