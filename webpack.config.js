@@ -15,7 +15,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js/,
+        test: /\.(js|jsx)$/,
         exclude: /(node_modules)/,
         use: {
           loader: 'babel-loader',
@@ -64,5 +64,8 @@ module.exports = {
     },
     compress: true,
     port: 8080
+  },
+  resolve: {
+    extensions: ['.js', '.jsx'],
   },
 };

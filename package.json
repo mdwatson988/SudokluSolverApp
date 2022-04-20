@@ -2,7 +2,7 @@
   "name": "Sudoku Solver App",
   "version": "1.0.0",
   "description": "JavaScript React sudoku solver, Express server communicating with MongoDB to store/retrieve usage statistics",
-  "main": "index.js",
+  "main": "/index.js",
   "scripts": {
     "start": "NODE_ENV=production node server/server.js",
     "build": "NODE_ENV=production webpack",
