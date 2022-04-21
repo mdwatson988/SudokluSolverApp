@@ -30,6 +30,7 @@ class BoardContainer extends Component {
           determine3x3={this.determine3x3}
         />
 
+        {/* message only displayed with invalid input */}
         {this.state.message !== '' && <h3 id='message'>{this.state.message}</h3>}
         
         <SolveButton
@@ -41,6 +42,24 @@ class BoardContainer extends Component {
       </div>
     );
   }
+
+  determine3x3(row, col) {
+    if (row <= 3) {
+      if (col <= 3) return 1
+      else if (col <= 6) return 2
+      else return 3
+    }
+    else if (row <= 6) {
+      if (col <= 3) return 4
+      else if (col <= 6) return 5
+      else return 6
+    }
+    else {
+      if (col <= 3) return 7
+      else if (col <= 6) return 8
+      else return 9
+    }
+  };
 
   resetState() {
     const newBoxValues = {};
@@ -66,18 +85,30 @@ class BoardContainer extends Component {
   }
 
   handleBoxInput(event) {
-    const rowKey = event.target.id[1];
-    const colKey = event.target.id[3];
+    const id = event.target.id
+    const rowKey = id[1];
+    const colKey = id[3];
     const threeX3Key = this.determine3x3(rowKey, colKey);
     let newBoxValues = this.state.boxValues;
     let newRowValues = this.state.rowValues;
     let newColValues = this.state.colValues;
     let new3x3Values = this.state.threeX3Values;
-    const stringValue = String(event.target.value);
-    let inputValue = undefined;
+    const inputValue = Number(event.target.value);
 
-    if (/[1-9]{1}/.test(stringValue)) inputValue = Number(stringValue);
-    if (inputValue !== undefined) {
+    // logic for removing values from state objects when numbers are deleted
+    if (isNaN(event.target.valueAsNumber)) {
+      if (this.state.boxValues[id]) {
+        newRowValues[rowKey].delete(newBoxValues[id]);
+        newColValues[colKey].delete(newBoxValues[id]);
+        new3x3Values[threeX3Key].delete(newBoxValues[id]);
+        newBoxValues = { ...this.state.boxValues };
+        delete newBoxValues[id];
+      }
+    }
+
+    // adds appropriate values to state with appropriate input if state obj doens't hold values for that box
+    // input type disallows non-number inputs, first number to be inputted gets saved as long as isn't 0
+    else if (!this.state.boxValues[id] && inputValue != 0) {
       const newBoxValue = {};
       newBoxValue[event.target.id] = inputValue;
       newBoxValues = Object.assign(this.state.boxValues, newBoxValue);
@@ -104,6 +135,7 @@ class BoardContainer extends Component {
       }
     }
 
+    // reset/remove message if invalid inputs are removed
     let newMessage = this.state.message;
     if (this.ensureValidity()) newMessage = '';
 
@@ -114,24 +146,6 @@ class BoardContainer extends Component {
       threeX3Values: new3x3Values,
       message: newMessage,
     })
-  };
-
-  determine3x3(row, col) {
-    if (row <= 3) {
-      if (col <= 3) return 1
-      else if (col <= 6) return 2
-      else return 3
-    }
-    else if (row <= 6) {
-      if (col <= 3) return 4
-      else if (col <= 6) return 5
-      else return 6
-    }
-    else {
-      if (col <= 3) return 7
-      else if (col <= 6) return 8
-      else return 9
-    }
   };
 
   updateMessage(string) {
