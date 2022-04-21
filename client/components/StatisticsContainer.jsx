@@ -6,7 +6,7 @@ import ResetButton from "./ResetButton.jsx";
 class StatisticsContainer extends Component {
   render() {
     return (
-      <div id="statsContainer">
+      <div id="statsContainer" className="container">
         <StatisticsDisplay
           solvedToday={this.props.solvedToday}
           solvedThisMonth={this.props.solvedThisMonth}

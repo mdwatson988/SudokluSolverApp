@@ -1,3 +1,57 @@
 body {
   background: $lightBlue;
 }
+
+#title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#board {
+  // box-sizing: border-box;
+  width: fit-content;
+  height: fit-content;
+  margin: 20px auto;
+  border: 4px solid black;
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+}
+
+
+
+.box {
+  border: 1px solid black;
+  width: 1.9em;
+  height: 1.9em;
+  font-size: 1.9em;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+#bot {
+  border-bottom: 4px solid black;
+}
+
+#right {
+  border-right: 4px solid black;
+}
+
+#botRight {
+  border-bottom: 4px solid black;
+  border-right: 4px solid black;
+}
+
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

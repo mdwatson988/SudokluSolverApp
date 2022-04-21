@@ -24,7 +24,6 @@ statisticsController.getDocument = (req, res, next) => {
       createErr({
         method: 'getDocument',
         type: 'when finding document',
-        status: 400,
         err: err,
       })
     )
@@ -71,7 +70,6 @@ statisticsController.setDate = (req, res, next) => {
           createErr({
             method: 'setDate',
             type: 'when updating date',
-            status: 400,
             err: err,
           })
         )
@@ -97,7 +95,6 @@ statisticsController.updateStatistics = (req, res, next) => {
         createErr({
           method: 'updateStatistics',
           type: 'when updating statistics',
-          status: 400,
           err: err,
         })
       )
@@ -125,7 +122,6 @@ statisticsController.clearStatistics = (req, res, next) => {
         createErr({
           method: 'clearStatistics',
           type: 'when clearing staistics',
-          status: 400,
           err: err,
         })
       )

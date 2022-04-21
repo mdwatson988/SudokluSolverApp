@@ -15,7 +15,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.(js|jsx)$/,
+        test: /\.jsx?$/,
         exclude: /(node_modules)/,
         use: {
           loader: 'babel-loader',
@@ -60,12 +60,14 @@ module.exports = {
     proxy: {
       // when making a request to server, use the specified server domain 
       '/statistics': 'http://localhost:3000',
+      // for future use
       '/api': 'http://localhost:3000',
     },
     compress: true,
     port: 8080
   },
   resolve: {
+    // Enable importing JS / JSX files without specifying their extension
     extensions: ['.js', '.jsx'],
   },
 };
