@@ -9,10 +9,10 @@ class Board extends Component {
         boxes.push(<Box
           rowKey={i}
           colKey={j}
-          threeX3Key={this.determine3x3(i, j)}
+          threeX3Key={this.props.determine3x3(i, j)}
           boxKey={`r${i}c${j}`}
           value={this.props.boxValues[`r${i}c${j}`]}
-          // handleBoxInput={this.props.handleBoxInput}
+          handleBoxInput={this.props.handleBoxInput}
           key={`r${i}c${j}`}
         />);
       }
@@ -23,24 +23,6 @@ class Board extends Component {
       </div>
     )
   }
-
-  determine3x3 = (row, col) => {
-    if (row <= 3) {
-      if (col <= 3) return 1
-      else if (col <= 6) return 2
-      else return 3
-    }
-    else if (row <= 6) {
-      if (col <= 3) return 4
-      else if (col <= 6) return 5
-      else return 6
-    }
-    else {
-      if (col <= 3) return 7
-      else if (col <= 6) return 8
-      else return 9
-    }
-  };
 };
 
 export default Board;

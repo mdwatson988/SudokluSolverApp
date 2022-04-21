@@ -2,8 +2,11 @@ import React, { Component } from 'react';
 
 class SolveButton extends Component {
   onClick = (event) => {
-    this.props.handleClickUpdateButton();
-    // this.props.handleClickSolveButton();
+    if (this.props.ensureValidity()) {
+      this.props.handleClickUpdateButton();
+      // this.props.handleClickSolveButton();
+    }
+    else this.props.updateMessage('Unable to solve with invalid number inputs.')
   }
 
   render() {
