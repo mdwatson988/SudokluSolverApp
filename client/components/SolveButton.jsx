@@ -6,7 +6,7 @@ class SolveButton extends Component {
       this.props.handleClickUpdateButton();
       // this.props.handleClickSolveButton();
     }
-    else this.props.updateMessage('Unable to solve with invalid number inputs.')
+    else this.props.updateMessage('Unable to solve with invalid number inputs. ')
   }
 
   render() {
