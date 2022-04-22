@@ -12,7 +12,7 @@ class SolveButton extends Component {
   render() {
     return (
       <button id="solveButton" type="button" onClick={this.onClick}>
-        Solve
+        SOLVE
       </button>
     )
   }

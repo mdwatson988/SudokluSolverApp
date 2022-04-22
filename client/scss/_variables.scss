@@ -1,3 +1,4 @@
-$lightBlue: lightblue;
-$darkBlue: darkblue;
+@use "sass:color";
+$primaryColor: rgb(16, 16, 189);
+$borderPrimary: color.adjust($primaryColor, $lightness: 30%);
 $lightRed: rgba(255, 0, 13, 0.772);
