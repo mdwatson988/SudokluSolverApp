@@ -22,7 +22,11 @@ class App extends Component {
   componentDidMount() {
     fetch(this.statsGetURL)
       .then(response => response.json())
-      .then(stats => this.setState({ solvedToday: stats.solvedToday, solvedThisMonth: stats.solvedThisMonth, solvedTotal: stats.solvedTotal }))
+      .then(stats => this.setState({ 
+          solvedToday: stats.solvedToday, 
+          solvedThisMonth: stats.solvedThisMonth, 
+          solvedTotal: stats.solvedTotal 
+        }))
       .catch(err => console.log(`error when fetching/setting stats state: ${err}`));
   }
 
@@ -47,14 +51,22 @@ class App extends Component {
   handleClickUpdateButton(event) {
     fetch(this.statsUpdateURL)
       .then(response => response.json())
-      .then(stats => this.setState({ solvedToday: stats.solvedToday, solvedThisMonth: stats.solvedThisMonth, solvedTotal: stats.solvedTotal }))
+      .then(stats => this.setState({ 
+        solvedToday: stats.solvedToday, 
+        solvedThisMonth: stats.solvedThisMonth, 
+        solvedTotal: stats.solvedTotal
+      }))
       .catch(err => console.log(`error when updating stats state: ${err}`));
   }
 
   handleClickResetButton(event) {
     fetch(this.statsResetURL)
       .then(response => response.json())
-      .then(stats => this.setState({ solvedToday: stats.solvedToday, solvedThisMonth: stats.solvedThisMonth, solvedTotal: stats.solvedTotal }))
+      .then(stats => this.setState({
+        solvedToday: stats.solvedToday, 
+        solvedThisMonth: stats.solvedThisMonth, 
+        solvedTotal: stats.solvedTotal
+      }))
       .catch(err => console.log(`error when resetting stats state: ${err}`));
   }
 }

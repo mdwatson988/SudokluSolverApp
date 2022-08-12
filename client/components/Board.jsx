@@ -10,8 +10,7 @@ class Board extends Component {
           rowKey={i}
           colKey={j}
           threeX3Key={this.props.determine3x3(i, j)}
-          boxKey={`r${i}c${j}`}
-          // value={this.props.boxValues[`r${i}c${j}`]}
+          /*boxKey={`r${i}c${j}`}*/
           handleBoxInput={this.props.handleBoxInput}
           key={`r${i}c${j}`}
         />);
