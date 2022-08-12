@@ -27,7 +27,6 @@ class BoardContainer extends Component {
       <div id="boardContainer" className="container">
         <Board
           handleBoxInput={this.handleBoxInput}
-          determine3x3={this.determine3x3}
         />
 
         {/* message only displayed with invalid input */}
@@ -42,24 +41,6 @@ class BoardContainer extends Component {
       </div>
     );
   }
-
-  determine3x3(row, col) {
-    if (row <= 3) {
-      if (col <= 3) return 1
-      else if (col <= 6) return 2
-      else return 3
-    }
-    else if (row <= 6) {
-      if (col <= 3) return 4
-      else if (col <= 6) return 5
-      else return 6
-    }
-    else {
-      if (col <= 3) return 7
-      else if (col <= 6) return 8
-      else return 9
-    }
-  };
 
   resetState() {
     const newRowValues = {};
@@ -91,7 +72,7 @@ class BoardContainer extends Component {
     const id = event.target.id;
     const rowKey = id[1];
     const colKey = id[3];
-    const threeX3Key = this.determine3x3(rowKey, colKey);
+    const threeX3Key = id[5]
     const newRowValues = this.state.rowInputValues;
     const newColValues = this.state.colInputValues;
     const new3x3Values = this.state.threeX3InputValues;
@@ -148,9 +129,7 @@ class BoardContainer extends Component {
       newColValues[colKey].set(id, inputValue);
       new3x3Values[threeX3Key].set(id, inputValue);
     }
-    
-    const determine3x3 = this.determine3x3;
-    
+
     function resetValidity() {
       for (const invalidBox of newInvalidBoxes.values()) {
 
@@ -161,7 +140,7 @@ class BoardContainer extends Component {
 
         if (value) {
           const colKey = id[3];
-          const threeX3Key = determine3x3(rowKey, colKey)
+          const threeX3Key = id[5]
           const colMap = newColValues[colKey];
           const threeX3Map = new3x3Values[threeX3Key];
           let rowValueCounter = 0;
