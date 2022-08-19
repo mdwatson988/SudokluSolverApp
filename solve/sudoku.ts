@@ -1,19 +1,24 @@
-import { SudokuValuesObject, UserInputArray, SolverInputArray } from "./types";
+import { CoordValues, AttemptedValues, SudokuValues } from "./types";
 
 export default class Sudoku {
 
   private unavailableCoords: Set<string>;
-  private availableValues: SudokuValuesObject;
+  private availableValues: CoordValues;
+  private attemptedValues: AttemptedValues;
+
+  private rows: SudokuValues;
+  private columns: SudokuValues;
+  private boxes: SudokuValues;
 
   public constructor(
-    userInputRows: UserInputArray,
-    userInputCols: UserInputArray,
-    userInputBoxes: UserInputArray
+    userInputRows: SudokuValues,
+    userInputCols: SudokuValues,
+    userInputBoxes: SudokuValues
   ) {
 
-    const solverRows: SolverInputArray = userInputRows.slice();
-    const solverCols: SolverInputArray = userInputCols.slice();
-    const solverBoxes: SolverInputArray = userInputBoxes.slice();
+    this.rows = userInputRows;
+    this.columns = userInputCols;
+    this.boxes = userInputBoxes;
 
     for (let i = 1; i < 10; i++) {
       const row = "r" + i
@@ -28,19 +33,19 @@ export default class Sudoku {
 
     let numLeftToFill: number = 81;
 
-    for (const map of userInputRows) {
+    for (const map of Object.values(this.rows)) {
       for (const [coord, value] of map) {
         this.unavailableCoords.add(coord);
         this.availableValues["r" + coord[1]].delete(value);
         numLeftToFill--;
       }
     }
-    for (const map of userInputCols) {
+    for (const map of Object.values(this.columns)) {
       for (const [coord, value] of map) {
         this.availableValues["c" + coord[3]].delete(value);
       }
     }
-    for (const map of userInputBoxes) {
+    for (const map of Object.values(this.boxes)) {
       for (const [coord, value] of map) {
         this.availableValues["b" + coord[5]].delete(value);
       }
@@ -62,7 +67,13 @@ export default class Sudoku {
 
   }
 
-  private _addValue() {
+  private _addValue(targetCoord, targetValue) {
+    this.solverRows['r' + targetCoord[1]] = targetValue
+    this.solverCols['c' + targetCoord[3]] = targetValue
+    this.solverBoxes['b' + targetCoord[5]] = targetValue
+
+    this.attemptedValues[targetCoord].add(targetValue)
+
 
   }
 

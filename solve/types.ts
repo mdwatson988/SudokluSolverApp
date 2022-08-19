@@ -1,10 +1,13 @@
-export interface SudokuValuesObject {
+export interface CoordValues {
   location: string;
   value: number;
 }
 
+export type AttemptedValues = Map<string, Set<number> >;
+
 type SudokuInputs = Map<string, number>;
 
-export type UserInputArray = readonly SudokuInputs[];
-
-export type SolverInputArray = SudokuInputs[];
+export interface SudokuValues {
+  key: number;
+  value: SudokuInputs;
+};
