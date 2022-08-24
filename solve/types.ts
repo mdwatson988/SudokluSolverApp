@@ -1,13 +1,8 @@
-export interface CoordValues {
-  location: string;
-  value: number;
-}
-
-export type AttemptedValues = Map<string, Set<number> >;
-
 type SudokuInputs = Map<string, number>;
 
 export interface SudokuValues {
-  key: number;
-  value: SudokuInputs;
+  key: number; // number of row/column/box
+  value: SudokuInputs; // (box label: value in box)
 };
+
+export type ZoneValues = Map<string, Set<number> >;
