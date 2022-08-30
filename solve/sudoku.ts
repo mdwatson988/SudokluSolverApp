@@ -2,7 +2,7 @@ import { ZoneValues, SudokuValues } from "./types";
 
 export default class Sudoku {
 
-  private unavailableCoords: Set<string>;
+  private unavailableCoords: Set<string>; // is this ever used?
   private availableValues: ZoneValues;
   private attemptedValues: ZoneValues;
   private numLeftToFill: number = 81;
@@ -56,21 +56,40 @@ export default class Sudoku {
     }
   }
 
+  private _determineBox(row: number, col:number): number {
+    if (row <= 3) {
+      if (col <= 3) return 1
+      else if (col <= 6) return 2
+      else return 3
+    }
+    else if (row <= 6) {
+      if (col <= 3) return 4
+      else if (col <= 6) return 5
+      else return 6
+    }
+    else {
+      if (col <= 3) return 7
+      else if (col <= 6) return 8
+      else return 9
+    }
+  };
+
   // finds row/column/box that is closest to being completed
   // and therefore most likely to have correct values guessed
   private _zoneTargetFinder(): string | null {
     let currentTarget;
-    let minNumToFill = 9;
+    let minNumToFill = 10;
 
-    this.availableValues.forEach((set, zone) => {
+    for (const [zone, set] of this.availableValues.entries()) {
       const numLeftToFill = 9 - set.size;
 
       if (numLeftToFill === 0) null;
       else if (numLeftToFill < minNumToFill) {
         currentTarget = zone;
         minNumToFill = numLeftToFill;
+        if (minNumToFill === 1) break; // zone with 1 to fill is ideal, no need to keep looking
       }
-    })
+    }
 
     if (currentTarget) return currentTarget;
     else {
@@ -80,20 +99,78 @@ export default class Sudoku {
   }
 
   // determines exact coordinate for guess within target row/column/box
+  // finds which column is closest to completed within target row
+  // or vice versa
   private _targetFinder() {
     const targetZone = this._zoneTargetFinder();
-    let zone;
+    let target: string;
 
     if (targetZone) {
+       // find available space in row or column within target zone closest to being completed
+      function rowOrColumn(noIntersect: Set<number>, rowsOrColumns: SudokuValues): string {
+        let minSize = 10
+        let results;
+        for (const [num, map] of Object.entries(rowsOrColumns)) {
+          if (noIntersect.has(Number(num))) {
+            if (map.size < minSize) {
+              minSize = map.size
+              results = num;
+              if (minSize === 1) break;
+            }
+          }
+        }
+        return results;
+      }
 
-      if (targetZone[0] === "r") zone = this.rows[targetZone[1]];
-      else if (targetZone[0] === "c") zone = this.columns[targetZone[1]]
-      else if (targetZone[0] === "b") zone = this.boxes[targetZone[1]]
+      const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-      // how to determine coordinate that isn't already part of the map?
-      // zone currently contains a map of occupied coords => value at coord
+      if (targetZone[0] === "r") {
+      // this tracks all occupied columns in target row
+      const occupiedColumns = new Set();
+        for (const coord of this.rows[targetZone[1]].keys()) {
+          occupiedColumns.add(Number(coord[3]))
+        }
+
+        // https://stackoverflow.com/questions/1885557/simplest-code-for-array-intersection-in-javascript
+        const noIntersect = new Set(nums.filter(x => !occupiedColumns.has(x))) // potential column numbers to choose from
+
+        const colNum = rowOrColumn(noIntersect, this.columns);
+        const boxNum = this._determineBox(Number(targetZone[1]), Number(colNum));
+        target = "r" + targetZone[1] + "c" + colNum + "b" + boxNum;
+      }
+
+      else if (targetZone[0] === "c") {
+        const occupiedRows = new Set();
+        for (const coord of this.columns[targetZone[1]].keys()) {
+          occupiedRows.add(Number(coord[1]))
+        }
+
+        const noIntersect = new Set(nums.filter(x => !occupiedRows.has(x))) // potential row numbers to choose from
+        
+        const rowNum = rowOrColumn(noIntersect, this.rows);
+        const boxNum = this._determineBox(Number(rowNum), Number(targetZone[1]));
+        target = "r" + rowNum + "c" + targetZone[1] + "b" + boxNum;
+      }
+
+      else { // target is a box
+        const occupiedRows = new Set();
+        const occupiedColumns = new Set();
+
+        for (const coord of this.boxes[targetZone[1]].keys()) {
+          occupiedRows.add(Number(coord[1]));
+          occupiedColumns.add(Number(coord[3]));
+        }
+
+        // how to make sure column and row match up within box?
+        // i.e. row 3 has open spaces in spots 1 and 3
+        // don't want to choose row 3 as closest row to being filled
+        // then column 2 as closest column to be filled
+        // then find that row 3, col 2 already has a value
+
+        target = "r" + "c" + "b" + targetZone[1];
+      }
+      return target;
     }
-
   }
 
   private _guessTargetValue() {
