@@ -1,8 +1,10 @@
 type SudokuInputs = Map<string, number>;
 
-export interface SudokuValues {
+// for saving values for each row/col/box - matches data type of saved state on front end
+export interface SudokuValues { 
   key: number; // number of row/column/box
   value: SudokuInputs; // (box label: value in box)
 };
 
-export type ZoneValues = Map<string, Set<number> >;
+// for saving data necessary for solver to function
+export type SolverValues = Map<string, Set<number> >;
