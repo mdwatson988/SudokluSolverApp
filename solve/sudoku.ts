@@ -61,8 +61,8 @@ export default class Sudoku {
 
   // finds row/column/box that is closest to being completed
   // and therefore most likely to have correct values guessed
-  private _zoneTargetFinder(): string | undefined {
-    let currentTarget;
+  private _zoneTargetFinder(): string | null {
+    let currentZoneTarget;
     let minNumToFill: number = 10;
 
     for (const [zone, set] of this.valuesNeededInZone.entries()) {
@@ -72,24 +72,23 @@ export default class Sudoku {
 
         if (numCoordsStillEmpty === 0) null;
         else if (numCoordsStillEmpty < minNumToFill) {
-          currentTarget = zone;
+          currentZoneTarget = zone;
           minNumToFill = numCoordsStillEmpty;
           if (minNumToFill === 1) break; // zone with 1 to fill is ideal, no need to keep looking
         }
       }
     }
-    // returning undefined is unexpected behavior
-    return currentTarget ? currentTarget : undefined; // may need to rethink the undefined vs null thing
+    // returning null is unexpected behavior
+    return currentZoneTarget ? currentZoneTarget : null;
   }
 
 
   // determines exact coordinate for guess within target row/column/box
   // finds which column is closest to completed within target row or vice versa
-  // returning null is expected behavior, returning undefined is not
-  private _coordTargetFinder(targetZone: string | undefined): string | null | undefined {
+  private _coordTargetFinder(targetZone: string | null): string | null {
     if (!targetZone) {
       console.log("Unable to find target zone")
-      return undefined;
+      return null;
     }
 
     function _determineBox(row: number, col:number): number {
@@ -149,10 +148,10 @@ export default class Sudoku {
     // https://stackoverflow.com/questions/1885557/simplest-code-for-array-intersection-in-javascript
 
     targetZone[0] === "r"
-      ? colNumber = _rowOrColumn(noIntersect, this.columns) // this could evaluate to undefined
-      : rowNumber = _rowOrColumn(noIntersect, this.rows); // this could evaluate to undefined
+      ? colNumber = _rowOrColumn(noIntersect, this.columns) // this could evaluate to null
+      : rowNumber = _rowOrColumn(noIntersect, this.rows); // this could evaluate to null
 
-    // if unable to find row/col, solve f'n will have to remove
+    // if unable to find row/col, solve f'n will have to remove a guessed value
     // this function returning null is expected behavior
     if (!rowNumber || !colNumber) return null;
 
@@ -162,11 +161,10 @@ export default class Sudoku {
   }
 
 
-  private _guessTargetValue(targetCoord: string | undefined): number | string | undefined {
-    // this is unexpected behavior, solve f'n checks for null target coord prior to guessing value
-    if (targetCoord === undefined) {
+  private _guessTargetValue(targetCoord: string | null): number | string | null {
+    if (targetCoord === null) {
       console.log("Unable to find target coords");
-      return undefined;
+      return null;
     }
 
     const possRowVals: Set<number> = this.valuesNeededInZone["r" + targetCoord[1]]
@@ -223,17 +221,22 @@ export default class Sudoku {
   }
 
 
-  public solve(coordsWhereSolverAddedValue: string[] = []): SudokuValues[] | undefined {
+  public solve(coordsWhereSolverAddedValue: string[] = [], zoneCurrentlyBeingFilled: string): SudokuValues[] | null {
     // break out if no user input, this is unexpected behavior
     if (this.numCoordsStillEmpty === 81) {
       console.log("No values received from front end when sudoku object was instantiated")
-      return undefined;
+      return null;
     }
 
     // base case
     if (this.numCoordsStillEmpty === 0) return [this.rows, this.columns, this.boxes]
 
-    const targetZone = this._zoneTargetFinder();
+    let targetZone: string | null;
+    const numValuesNeededInCurrentZone = this.valuesNeededInZone[zoneCurrentlyBeingFilled]?.size
+
+    if (zoneCurrentlyBeingFilled && numValuesNeededInCurrentZone > 0) targetZone = zoneCurrentlyBeingFilled;
+    else targetZone = this._zoneTargetFinder(); // only search for new zone when prev zone was filled
+
     const targetCoord = this._coordTargetFinder(targetZone);
 
     // if no target coord found, values guessed by solve f'n need to be removed for new guesses
@@ -256,10 +259,27 @@ export default class Sudoku {
         }
       }
     }
-    else { // target coord found, need to guess value at target coord
 
+    else { // target coord found, need to guess value at target coord
+      const newTargetValue = this._guessTargetValue(targetCoord);
+
+      if (typeof newTargetValue === "string") { // no potential target value found - solve f'n previously guessed wrong
+        // if all potential values have been attempted at target coords, clear attempted values set at target
+        if (newTargetValue === "All potential values attempted") {
+          this.valuesAttemptedAtCoord[targetCoord].clear();
+        }
+
+        // remove prev node and try new value at that coord
+        const previousTarget = coordsWhereSolverAddedValue.pop();
+        if (previousTarget) this._removeValue(previousTarget);
+      }
+
+      else { // target coords and potential value found
+        if (newTargetValue) this._addValue(targetCoord, newTargetValue)
+        coordsWhereSolverAddedValue.push(targetCoord);
+      }
     }
 
-    return this.solve(coordsWhereSolverAddedValue); // recursively add more values
+    return this.solve(coordsWhereSolverAddedValue, zoneCurrentlyBeingFilled); // recursively add more values
   }
 }
