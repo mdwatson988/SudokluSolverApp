@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 
 import Board from './Board';
 import SolveButton from './SolveButton';
+import Sudoku from '../../solve/sudoku';
 
 class BoardContainer extends Component {
   constructor(props) {
@@ -18,7 +19,7 @@ class BoardContainer extends Component {
     this.handleBoxInput = this.handleBoxInput.bind(this);
     this.ensureValidity = this.ensureValidity.bind(this);
     this.updateMessage = this.updateMessage.bind(this);
-    // this.handleClickSolveButton = this.handleClickSolveButton.bind(this);
+    this.handleClickSolveButton = this.handleClickSolveButton.bind(this);
     
   }
 
@@ -36,7 +37,7 @@ class BoardContainer extends Component {
           handleClickUpdateButton={this.props.handleClickUpdateButton}
           ensureValidity={this.ensureValidity}
           updateMessage={this.updateMessage}
-          // handleClickSolveButton={this.handleClickSolveButton}
+          handleClickSolveButton={this.handleClickSolveButton}
         />
       </div>
     );
@@ -183,6 +184,26 @@ class BoardContainer extends Component {
       message: newMessage,
     })
   };
+
+  handleClickSolveButton() {
+    let completedRows, completedColumns, completedBoxes;
+
+    const solved = new Sudoku(
+      this.state.rowInputValues, 
+      this.state.colInputValues, 
+      this.state.threeX3InputValues
+      ).solve();
+
+    [completedRows, completedColumns, completedBoxes] = solved;
+
+    this.setState({
+      rowInputValues: completedRows,
+      colInputValues: completedColumns,
+      threeX3InputValues: completedBoxes,
+    })
+
+    this.updateMessage("Your sudoku puzzle has been solved!");
+  }
 
   updateMessage(string) {
     if (this.state.message === '') this.setState({ message: string })

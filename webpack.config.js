@@ -15,14 +15,17 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.jsx?$/,
+        test: [/\.jsx?$/, /\.tsx?$/],
         exclude: /(node_modules)/,
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env', '@babel/preset-react']
+            presets: ['@babel/preset-env', '@babel/preset-typescript', '@babel/preset-react']
           }
         },
+        // test: /\.tsx?$/,
+        // use: 'ts-loader',
+        // exclude: /(node_modules)/
       },
       {
         test: /\.s[ac]ss$/i,
@@ -68,6 +71,6 @@ module.exports = {
   },
   resolve: {
     // Enable importing JS / JSX files without specifying their extension
-    extensions: ['.js', '.jsx'],
+    extensions: ['.js', '.jsx', '.ts'],
   },
 };

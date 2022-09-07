@@ -3,8 +3,8 @@ import { SolverValues, SudokuValues } from "./types";
 export default class Sudoku {
 
   private numCoordsStillEmpty: number = 81;
-  private valuesNeededInZone: SolverValues; // key is string "r1"/"c7"/"b3", value is set of nums
-  private valuesAttemptedAtCoord: SolverValues; // key is coord string "r1c7b3", value is set of nums
+  private valuesNeededInZone!: SolverValues; // key is string "r1"/"c7"/"b3", value is set of nums
+  private valuesAttemptedAtCoord!: SolverValues; // key is coord string "r1c7b3", value is set of nums
 
   rows: SudokuValues;
   columns: SudokuValues;
@@ -33,36 +33,40 @@ export default class Sudoku {
 
       // populate each set with values 1-9
       for (let j = 1; j < 10; j++) {
-        this.valuesNeededInZone.get(row)?.add(j);
-        this.valuesNeededInZone.get(column)?.add(j);
-        this.valuesNeededInZone.get(box)?.add(j);
+        this.valuesNeededInZone.get(row)!.add(j);
+        this.valuesNeededInZone.get(column)!.add(j);
+        this.valuesNeededInZone.get(box)!.add(j);
       }
     }
 
     // update with starting values passed in from front end state
     for (const map of Object.values(this.rows)) {
       for (const [coord, value] of map) {
-        this.valuesNeededInZone.get("r" + coord[1])?.delete(value);
+        this.valuesNeededInZone.get("r" + coord[1])!.delete(value);
         this.numCoordsStillEmpty--;
       }
     }
     for (const map of Object.values(this.columns)) {
       for (const [coord, value] of map) {
-        this.valuesNeededInZone.get("c" + coord[3])?.delete(value);
+        if (this.valuesNeededInZone.has("c" + coord[3])) {
+          this.valuesNeededInZone.get("c" + coord[3])!.delete(value);
+          console.log("found coord c" + coord[3]);
+        }
       }
     }
     for (const map of Object.values(this.boxes)) {
       for (const [coord, value] of map) {
-        this.valuesNeededInZone.get("b" + coord[5])?.delete(value);
+        this.valuesNeededInZone.get("b" + coord[5])!.delete(value);
       }
     }
   }
+  
 
 
   // finds row/column/box that is closest to being completed
   // and therefore most likely to have correct values guessed
-  private _zoneTargetFinder(): string | null {
-    let currentZoneTarget;
+  private _zoneTargetFinder(): string{
+    let currentZoneTarget: string;
     let minNumToFill: number = 10;
 
     for (const [zone, set] of this.valuesNeededInZone.entries()) {
@@ -79,17 +83,13 @@ export default class Sudoku {
       }
     }
     // returning null is unexpected behavior
-    return currentZoneTarget ? currentZoneTarget : null;
+    return currentZoneTarget!;
   }
 
 
   // determines exact coordinate for guess within target row/column/box
   // finds which column is closest to completed within target row or vice versa
-  private _coordTargetFinder(targetZone: string | null): string | null {
-    if (!targetZone) {
-      console.log("Unable to find target zone")
-      return null;
-    }
+  private _coordTargetFinder(targetZone: string): string | null {
 
     function _determineBox(row: number, col:number): number {
       if (row <= 3) {
@@ -110,46 +110,46 @@ export default class Sudoku {
     };
 
       // find available space in row or column within target zone closest to being completed
-    function _rowOrColumn(noIntersect: Set<number>, rowsOrColumns: SudokuValues): string {
-      let minSize = 10
-      let results;
-      for (const [num, map] of Object.entries(rowsOrColumns)) {
-        if (noIntersect.has(Number(num))) {
-          if (map.size < minSize) {
-            minSize = map.size
-            results = num;
-            if (map.size === 1) break;
+    function _rowOrColumn(potentialZones: Set<number>, rowsOrColumns: SudokuValues): string | undefined {
+      let minSize: number = 10
+      let results: string | undefined;
+      for (const [zoneNum, coordsWithValues] of Object.entries(rowsOrColumns)) {
+        if (potentialZones.has(Number(zoneNum))) {
+          if (coordsWithValues.size < minSize) {
+            minSize = coordsWithValues.size
+            results = zoneNum;
+            if (coordsWithValues.size === 1) break;
           }
         }
       }
       return results;
     }
 
-    const occupied = new Set();
+    const occupiedZones = new Set();
     let rowNumber;
     let colNumber;
 
     if (targetZone[0] === "r") { // target is a row
       rowNumber = targetZone[1];
       for (const coord of this.rows[targetZone[1]].keys()) {
-        occupied.add(Number(coord[3]))
+        occupiedZones.add(Number(coord[3]))
       }
     }
 
     else { // target is a column
       colNumber = targetZone[1];
       for (const coord of this.columns[targetZone[1]].keys()) {
-        occupied.add(Number(coord[1]))
+        occupiedZones.add(Number(coord[1]))
       }
     }
 
     const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-    const noIntersect = new Set(nums.filter(x => !occupied.has(x))) // potential row/column numbers to choose from
+    const potentialZones = new Set(nums.filter(rowOrColumnNumber => !occupiedZones.has(rowOrColumnNumber)))
     // https://stackoverflow.com/questions/1885557/simplest-code-for-array-intersection-in-javascript
 
     targetZone[0] === "r"
-      ? colNumber = _rowOrColumn(noIntersect, this.columns) // this could evaluate to null
-      : rowNumber = _rowOrColumn(noIntersect, this.rows); // this could evaluate to null
+      ? colNumber = _rowOrColumn(potentialZones, this.columns) // this could evaluate to undefined
+      : rowNumber = _rowOrColumn(potentialZones, this.rows); // this could evaluate to undefined
 
     // if unable to find row/col, solve f'n will have to remove a guessed value
     // this function returning null is expected behavior
@@ -167,9 +167,9 @@ export default class Sudoku {
       return null;
     }
 
-    const possRowVals: Set<number> = this.valuesNeededInZone["r" + targetCoord[1]]
-    const possColVals: Set<number> = this.valuesNeededInZone["c" + targetCoord[3]]
-    const possBoxVals: Set<number> = this.valuesNeededInZone["b" + targetCoord[5]]
+    const possRowVals: Set<number> = this.valuesNeededInZone.get("r" + targetCoord[1])!;
+    const possColVals: Set<number> = this.valuesNeededInZone.get("c" + targetCoord[3])!;
+    const possBoxVals: Set<number> = this.valuesNeededInZone.get("b" + targetCoord[5])!;
 
     // set of all values which still fit within row/col/box constraints at target coord
     const possibleValues: Set<number> = [possRowVals, possColVals, possBoxVals]
@@ -179,14 +179,19 @@ export default class Sudoku {
     if (possibleValues.size === 0) return "No value possible";
 
     // guess and return first value which is possible and hasn't been attempted
-    const valuesAttemptedAtCoord: Set<number> = this.valuesAttemptedAtCoord[targetCoord];
-    for (const value of possibleValues) {
-      if (!valuesAttemptedAtCoord.has(value)) return value;
-    }
+    if (this.valuesAttemptedAtCoord.has(targetCoord)) {
+      const valuesAttemptedAtCoord: Set<number> = this.valuesAttemptedAtCoord.get(targetCoord)!;
 
-    // if all possible values for target have been attempted
-    // solve f'n must remove the node previous to target and try new value there
-    return "All potential values attempted"
+      for (const value of possibleValues) {
+        if (!valuesAttemptedAtCoord.has(value)) return value;
+      }
+      
+      // if all possible values for target have been attempted
+      // solve f'n must remove the node previous to target and try new value there
+      return "All potential values attempted"
+    }
+    // no value has been attempted at this coord, try first value in set
+    else return possibleValues.values().next().value
   }
 
 
@@ -196,11 +201,14 @@ export default class Sudoku {
     this.columns[targetCoord[3]].set(targetCoord, targetValue);
     this.boxes[targetCoord[5]].set(targetCoord, targetValue);
     
-    this.valuesNeededInZone.get("r" + targetCoord[1])?.delete(targetValue);
-    this.valuesNeededInZone.get("c" + targetCoord[3])?.delete(targetValue);
-    this.valuesNeededInZone.get("b" + targetCoord[5])?.delete(targetValue);
+    this.valuesNeededInZone.get("r" + targetCoord[1])!.delete(targetValue);
+    this.valuesNeededInZone.get("c" + targetCoord[3])!.delete(targetValue);
+    this.valuesNeededInZone.get("b" + targetCoord[5])!.delete(targetValue);
 
-    this.valuesAttemptedAtCoord[targetCoord].add(targetValue);
+    if (!this.valuesAttemptedAtCoord.has(targetCoord)) {
+      this.valuesAttemptedAtCoord.set(targetCoord, new Set())
+    }
+    this.valuesAttemptedAtCoord.get(targetCoord)!.add(targetValue)
 
     this.numCoordsStillEmpty--;
   }
@@ -213,16 +221,16 @@ export default class Sudoku {
     this.columns[targetCoord[3]].delete(targetCoord);
     this.boxes[targetCoord[5]].delete(targetCoord);
 
-    this.valuesNeededInZone.get("r" + targetCoord[1])?.add(valueRemoved);
-    this.valuesNeededInZone.get("c" + targetCoord[3])?.add(valueRemoved);
-    this.valuesNeededInZone.get("b" + targetCoord[5])?.add(valueRemoved);
+    this.valuesNeededInZone.get("r" + targetCoord[1])!.add(valueRemoved);
+    this.valuesNeededInZone.get("c" + targetCoord[3])!.add(valueRemoved);
+    this.valuesNeededInZone.get("b" + targetCoord[5])!.add(valueRemoved);
 
     this.numCoordsStillEmpty++;
   }
 
 
   public solve(coordsWhereSolverAddedValue: string[] = [], zoneCurrentlyBeingFilled: string): SudokuValues[] | null {
-    // break out if no user input, this is unexpected behavior
+    // break out if no user input, this is unexpected behavior that should be prevented on front end
     if (this.numCoordsStillEmpty === 81) {
       console.log("No values received from front end when sudoku object was instantiated")
       return null;
@@ -232,54 +240,54 @@ export default class Sudoku {
     if (this.numCoordsStillEmpty === 0) return [this.rows, this.columns, this.boxes]
 
     let targetZone: string | null;
-    const numValuesNeededInCurrentZone = this.valuesNeededInZone[zoneCurrentlyBeingFilled]?.size
+    const numValuesNeededInCurrentZone = this.valuesNeededInZone.get(zoneCurrentlyBeingFilled)?.size
 
-    if (zoneCurrentlyBeingFilled && numValuesNeededInCurrentZone > 0) targetZone = zoneCurrentlyBeingFilled;
+    if (zoneCurrentlyBeingFilled && numValuesNeededInCurrentZone && numValuesNeededInCurrentZone > 0) {
+      targetZone = zoneCurrentlyBeingFilled;
+    }
     else targetZone = this._zoneTargetFinder(); // only search for new zone when prev zone was filled
 
     const targetCoord = this._coordTargetFinder(targetZone);
 
     // if no target coord found, values guessed by solve f'n need to be removed for new guesses
     if (!targetCoord) {
-      const mostRecentTargetCoord = coordsWhereSolverAddedValue.pop();
+      const mostRecentTargetCoord = coordsWhereSolverAddedValue.pop()!;
 
-      if (mostRecentTargetCoord) {
-        this._removeValue(mostRecentTargetCoord);
-        const newTargetValue = this._guessTargetValue(mostRecentTargetCoord);
+      this._removeValue(mostRecentTargetCoord);
+      const newTargetValue = this._guessTargetValue(mostRecentTargetCoord);
 
-        if (typeof newTargetValue === "number") { // another possible value can be tried at most recent target
-          this._addValue(mostRecentTargetCoord, newTargetValue);
-          coordsWhereSolverAddedValue.push(mostRecentTargetCoord);
-        }
+      if (typeof newTargetValue === "number") { // another possible value can be tried at most recent target
+        this._addValue(mostRecentTargetCoord, newTargetValue);
+        coordsWhereSolverAddedValue.push(mostRecentTargetCoord);
+      }
 
-        else { // no more possible values at that location, need to remove next most recent value added by solve f'n
-          this.valuesAttemptedAtCoord[mostRecentTargetCoord].clear(); // reset attempted values at that coord
-          const nextMostRecentTargetCoord = coordsWhereSolverAddedValue.pop();
-          if (nextMostRecentTargetCoord) this._removeValue(nextMostRecentTargetCoord)
-        }
+      else { // no more possible values at that location, need to remove next most recent value added by solve f'n
+        this.valuesAttemptedAtCoord.get(mostRecentTargetCoord)!.clear(); // reset attempted values at that coord
+        const nextMostRecentTargetCoord = coordsWhereSolverAddedValue.pop();
+        if (nextMostRecentTargetCoord) this._removeValue(nextMostRecentTargetCoord)
       }
     }
 
     else { // target coord found, need to guess value at target coord
-      const newTargetValue = this._guessTargetValue(targetCoord);
+      const newTargetValue = this._guessTargetValue(targetCoord)!;
 
       if (typeof newTargetValue === "string") { // no potential target value found - solve f'n previously guessed wrong
         // if all potential values have been attempted at target coords, clear attempted values set at target
         if (newTargetValue === "All potential values attempted") {
-          this.valuesAttemptedAtCoord[targetCoord].clear();
+          this.valuesAttemptedAtCoord.get(targetCoord)!.clear();
         }
 
         // remove prev node and try new value at that coord
-        const previousTarget = coordsWhereSolverAddedValue.pop();
-        if (previousTarget) this._removeValue(previousTarget);
+        const previousTarget = coordsWhereSolverAddedValue.pop()!;
+        this._removeValue(previousTarget);
       }
 
       else { // target coords and potential value found
-        if (newTargetValue) this._addValue(targetCoord, newTargetValue)
+        this._addValue(targetCoord, newTargetValue)
         coordsWhereSolverAddedValue.push(targetCoord);
       }
     }
 
-    return this.solve(coordsWhereSolverAddedValue, zoneCurrentlyBeingFilled); // recursively add more values
+    return this.solve(coordsWhereSolverAddedValue, targetZone!); // recursively add/remove more values
   }
 }
