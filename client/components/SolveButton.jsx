@@ -4,7 +4,7 @@ class SolveButton extends Component {
   onClick = (event) => {
     if (this.props.ensureValidity()) {
       this.props.handleClickUpdateButton();
-      // this.props.handleClickSolveButton();
+      this.props.handleClickSolveButton();
     }
     else this.props.updateMessage('Unable to solve with invalid number inputs. ')
   }

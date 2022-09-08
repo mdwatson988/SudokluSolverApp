@@ -5,7 +5,7 @@ class Box extends Component {
     return (
       <input type="number" min="1" max="9"
         onChange={this.props.handleBoxInput}
-        id={this.props.key}
+        id={this.props.boxKey}
         className="box"
         readOnly={false}>
       </input>
