@@ -3,8 +3,8 @@ import { SolverValues, SudokuValues } from "./types";
 export default class Sudoku {
 
   private numCoordsStillEmpty: number = 81;
-  private valuesNeededInZone!: SolverValues; // key is string "r1"/"c7"/"b3", value is set of nums
-  private valuesAttemptedAtCoord!: SolverValues; // key is coord string "r1c7b3", value is set of nums
+  private valuesNeededInZone: SolverValues = new Map(); // key is string "r1"/"c7"/"b3", value is set of nums
+  private valuesAttemptedAtCoord: SolverValues = new Map(); // key is coord string "r1c7b3", value is set of nums
 
   rows: SudokuValues;
   columns: SudokuValues;
@@ -48,10 +48,7 @@ export default class Sudoku {
     }
     for (const map of Object.values(this.columns)) {
       for (const [coord, value] of map) {
-        if (this.valuesNeededInZone.has("c" + coord[3])) {
           this.valuesNeededInZone.get("c" + coord[3])!.delete(value);
-          console.log("found coord c" + coord[3]);
-        }
       }
     }
     for (const map of Object.values(this.boxes)) {
@@ -82,7 +79,7 @@ export default class Sudoku {
         }
       }
     }
-    // returning null is unexpected behavior
+
     return currentZoneTarget!;
   }
 
@@ -162,10 +159,7 @@ export default class Sudoku {
 
 
   private _guessTargetValue(targetCoord: string | null): number | string | null {
-    if (targetCoord === null) {
-      console.log("Unable to find target coords");
-      return null;
-    }
+    if (targetCoord === null) return null;
 
     const possRowVals: Set<number> = this.valuesNeededInZone.get("r" + targetCoord[1])!;
     const possColVals: Set<number> = this.valuesNeededInZone.get("c" + targetCoord[3])!;

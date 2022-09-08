@@ -186,15 +186,13 @@ class BoardContainer extends Component {
   };
 
   handleClickSolveButton() {
-    let completedRows, completedColumns, completedBoxes;
-
-    const solved = new Sudoku(
+    const puzzle = new Sudoku(
       this.state.rowInputValues, 
       this.state.colInputValues, 
       this.state.threeX3InputValues
-      ).solve();
+    )
 
-    [completedRows, completedColumns, completedBoxes] = solved;
+    const [completedRows, completedColumns, completedBoxes] = puzzle.solve()
 
     this.setState({
       rowInputValues: completedRows,
