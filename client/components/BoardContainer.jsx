@@ -193,6 +193,16 @@ class BoardContainer extends Component {
     )
 
     const [completedRows, completedColumns, completedBoxes] = puzzle.solve()
+    
+    // update input boxes with solved puzzle values
+    const boxList = document.querySelectorAll('.box');
+    for (let i = 0; i < boxList.length; i++) {
+      if (isNaN(boxList[i].valueAsNumber)) {
+        const id = boxList[i].id; // id like "r1c2b1"
+        boxList[i].valueAsNumber = completedRows[id[1]].get(id);
+        boxList[i].style.color = "lime";
+      }
+    }
 
     this.setState({
       rowInputValues: completedRows,
