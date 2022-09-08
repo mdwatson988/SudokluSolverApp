@@ -1,4 +1,4 @@
-import { SolverValues, SudokuValues } from "./types";
+import { SolverValues, FrontEndValues } from "./types";
 
 export default class Sudoku {
 
@@ -6,14 +6,14 @@ export default class Sudoku {
   private valuesNeededInZone: SolverValues = new Map(); // key is string "r1"/"c7"/"b3", value is set of nums
   private valuesAttemptedAtCoord: SolverValues = new Map(); // key is coord string "r1c7b3", value is set of nums
 
-  rows: SudokuValues;
-  columns: SudokuValues;
-  boxes: SudokuValues;
+  rows: FrontEndValues;
+  columns: FrontEndValues;
+  boxes: FrontEndValues;
 
-  public constructor ( // invoke by passing sets storing state on front end
-    userInputRows: SudokuValues,
-    userInputCols: SudokuValues,
-    userInputBoxes: SudokuValues
+  public constructor ( // invoke by passing maps storing state on front end
+    userInputRows: FrontEndValues,
+    userInputCols: FrontEndValues,
+    userInputBoxes: FrontEndValues
   ) {
 
     this.rows = userInputRows;
@@ -107,7 +107,7 @@ export default class Sudoku {
     };
 
       // find available space in row or column within target zone closest to being completed
-    function _rowOrColumn(potentialZones: Set<number>, rowsOrColumns: SudokuValues): string | undefined {
+    function _rowOrColumn(potentialZones: Set<number>, rowsOrColumns: FrontEndValues): string | undefined {
       let minSize: number = 10
       let results: string | undefined;
       for (const [zoneNum, coordsWithValues] of Object.entries(rowsOrColumns)) {
@@ -223,7 +223,7 @@ export default class Sudoku {
   }
 
 
-  public solve(coordsWhereSolverAddedValue: string[] = [], zoneCurrentlyBeingFilled: string): SudokuValues[] | null {
+  public solve(coordsWhereSolverAddedValue: string[] = [], zoneCurrentlyBeingFilled: string): FrontEndValues[] | null {
     // break out if no user input, this is unexpected behavior that should be prevented on front end
     if (this.numCoordsStillEmpty === 81) {
       console.log("No values received from front end when sudoku object was instantiated")
@@ -234,6 +234,7 @@ export default class Sudoku {
     if (this.numCoordsStillEmpty === 0) return [this.rows, this.columns, this.boxes]
 
     let targetZone: string | null;
+
     const numValuesNeededInCurrentZone = this.valuesNeededInZone.get(zoneCurrentlyBeingFilled)?.size
 
     if (zoneCurrentlyBeingFilled && numValuesNeededInCurrentZone && numValuesNeededInCurrentZone > 0) {
@@ -258,7 +259,7 @@ export default class Sudoku {
       else { // no more possible values at that location, need to remove next most recent value added by solve f'n
         this.valuesAttemptedAtCoord.get(mostRecentTargetCoord)!.clear(); // reset attempted values at that coord
         const nextMostRecentTargetCoord = coordsWhereSolverAddedValue.pop();
-        if (nextMostRecentTargetCoord) this._removeValue(nextMostRecentTargetCoord)
+        this._removeValue(nextMostRecentTargetCoord!)
       }
     }
 

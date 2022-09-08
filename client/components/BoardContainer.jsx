@@ -192,8 +192,15 @@ class BoardContainer extends Component {
       this.state.threeX3InputValues
     )
 
-    const [completedRows, completedColumns, completedBoxes] = puzzle.solve()
-    
+    const solved = puzzle.solve()
+
+    if (solved === null) {
+      this.updateMessage("Enter some numbers to have your puzzle solved.");
+      return;
+    }
+
+    const [completedRows, completedColumns, completedBoxes] = solved
+
     // update input boxes with solved puzzle values
     const boxList = document.querySelectorAll('.box');
     for (let i = 0; i < boxList.length; i++) {
